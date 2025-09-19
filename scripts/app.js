@@ -23,14 +23,6 @@ const setStatus = (message, variant = 'info', link) => {
   }
 };
 
-const fileToDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('No se pudo leer el archivo de imagen.'));
-    reader.readAsDataURL(file);
-  });
-
 const normalizeContent = (text) => {
   if (!text) return '';
   const paragraphs = text
@@ -87,35 +79,61 @@ const publishPost = async (event) => {
     return;
   }
 
-  let finalContent = normalizeContent(content);
+  const normalizedContent = normalizeContent(content);
 
   try {
-    if (image && image.size > 0) {
-      const imageDataUrl = await fileToDataUrl(image);
-      finalContent += `\n<p><img src="${imageDataUrl}" alt="Imagen del artículo" style="max-width:100%;height:auto;" /></p>`;
+    const hasImage = image && image.size > 0;
+    const basePayload = {
+      kind: 'blogger#post',
+      title,
+      content: normalizedContent,
+    };
+
+    setStatus('Publicando artículo…', 'info');
+
+    const endpointBase = `https://www.googleapis.com/blogger/v3/blogs/${BLOG_ID}/posts/`;
+    let fetchUrl = endpointBase;
+    let fetchOptions;
+
+    if (hasImage) {
+      const boundary = `bloggerboundary-${Date.now()}`;
+      const sanitizedFileName = (image.name || 'imagen').replace(/["\\]/g, '_');
+      const imageBuffer = await image.arrayBuffer();
+      const multipartBody = new Blob(
+        [
+          `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(
+            basePayload
+          )}\r\n`,
+          `--${boundary}\r\nContent-Type: ${
+            image.type || 'application/octet-stream'
+          }\r\nContent-Disposition: attachment; filename="${sanitizedFileName}"\r\nContent-Transfer-Encoding: binary\r\n\r\n`,
+          new Uint8Array(imageBuffer),
+          `\r\n--${boundary}--\r\n`,
+        ],
+        { type: `multipart/related; boundary=${boundary}` }
+      );
+
+      fetchUrl = `${endpointBase}?uploadType=multipart`;
+      fetchOptions = {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': `multipart/related; boundary=${boundary}`,
+        },
+        body: multipartBody,
+      };
+    } else {
+      fetchOptions = {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(basePayload),
+      };
     }
-  } catch (error) {
-    setStatus(error.message, 'error');
-    return;
-  }
 
-  const payload = {
-    kind: 'blogger#post',
-    title,
-    content: finalContent,
-  };
-
-  setStatus('Publicando artículo…', 'info');
-
-  try {
-    const response = await fetch(`https://www.googleapis.com/blogger/v3/blogs/${BLOG_ID}/posts/`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch(fetchUrl, fetchOptions);
 
     if (!response.ok) {
       const errorResponse = await response.json().catch(() => ({}));
@@ -124,7 +142,47 @@ const publishPost = async (event) => {
       throw new Error(errorMessage);
     }
 
-    const result = await response.json();
+    let result = await response.json();
+
+    if (hasImage) {
+      const extractImageSrc = (html) => {
+        if (!html) return null;
+        const match = html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+        return match ? match[1] : null;
+      };
+
+      const existingImageSrc = extractImageSrc(result.content);
+      const hostedImageUrl = existingImageSrc || result.images?.[0]?.url || null;
+
+      if (!hostedImageUrl) {
+        throw new Error('No se pudo obtener la URL alojada de la imagen subida.');
+      }
+
+      if (!existingImageSrc) {
+        const updatedContent = `${normalizedContent}<p><img src="${hostedImageUrl}" alt="Imagen del artículo" style="max-width:100%;height:auto;" /></p>`;
+        const patchResponse = await fetch(
+          `${endpointBase}${result.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: updatedContent }),
+          }
+        );
+
+        if (!patchResponse.ok) {
+          const patchError = await patchResponse.json().catch(() => ({}));
+          const patchMessage =
+            patchError?.error?.message || 'No se pudo actualizar el contenido con la imagen alojada.';
+          throw new Error(patchMessage);
+        }
+
+        result = await patchResponse.json();
+      }
+    }
+
     setStatus('Artículo publicado correctamente.', 'success', {
       url: result.url,
       label: 'Ver la entrada en Blogger',
