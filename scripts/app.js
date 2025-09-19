@@ -1,5 +1,5 @@
 const BLOG_ID = '7027208528883466919';
-const CLIENT_ID = 'REPLACE_WITH_GOOGLE_CLIENT_ID';
+const CLIENT_ID = '729158287583-6qfobrrb9q6uufgeluic857mhlo4fbr6.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/blogger';
 
 let accessToken = null;
