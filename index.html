@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Publicador para Blogger</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <h1>Enviar artículo a Blogger</h1>
+        <p>
+          Esta herramienta te permite redactar una entrada, añadir una imagen y
+          publicarla directamente en tu blog de Blogger con ID <strong>7027208528883466919</strong>.
+        </p>
+      </header>
+
+      <section class="app__auth">
+        <button id="authorize" type="button" disabled>Conectar con Google</button>
+        <p class="app__note">
+          Asegúrate de utilizar una cuenta con permisos de edición sobre el blog.
+        </p>
+      </section>
+
+      <section class="app__form">
+        <form id="postForm" autocomplete="off">
+          <label class="form__field">
+            <span>Título</span>
+            <input type="text" name="title" id="title" required maxlength="150" placeholder="Introduce el título de la entrada" />
+          </label>
+
+          <label class="form__field">
+            <span>Contenido</span>
+            <textarea name="content" id="content" rows="10" required placeholder="Escribe aquí el contenido del artículo"></textarea>
+          </label>
+
+          <label class="form__field">
+            <span>Imagen (opcional)</span>
+            <input type="file" name="image" id="image" accept="image/*" />
+            <small>La imagen se incrustará dentro del contenido de la entrada.</small>
+          </label>
+
+          <button type="submit" class="form__submit">Publicar en Blogger</button>
+        </form>
+      </section>
+
+      <section class="app__status" aria-live="polite">
+        <div id="status" class="status status--info">Conéctate con Google para comenzar.</div>
+      </section>
+    </main>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="module" src="scripts/app.js"></script>
+  </body>
+</html>

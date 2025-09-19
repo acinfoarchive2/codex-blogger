@@ -1,0 +1,187 @@
+:root {
+  color-scheme: light dark;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  background-color: #f7f7f7;
+  color: #1c1c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background-color: #121212;
+    color: #f5f5f5;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+main.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.app__header h1 {
+  margin-bottom: 0.25rem;
+  font-size: clamp(1.75rem, 2vw + 1rem, 2.5rem);
+}
+
+.app__header p {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+
+.app__auth {
+  margin: 2rem 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  padding: 0.75rem 1.25rem;
+  background-color: #1a73e8;
+  color: white;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+}
+
+button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+button:not([disabled]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0.5rem 1.2rem rgba(26, 115, 232, 0.35);
+}
+
+button:not([disabled]):active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.app__form {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
+  border-radius: 1rem;
+  padding: 1.75rem;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app__form {
+    background: rgba(30, 30, 30, 0.85);
+    box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.4);
+  }
+}
+
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.form__field > span {
+  font-weight: 600;
+}
+
+.form__field input[type="text"],
+.form__field textarea {
+  font: inherit;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  color: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .form__field input[type="text"],
+  .form__field textarea {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(20, 20, 20, 0.9);
+  }
+}
+
+.form__field input[type="text"]:focus,
+.form__field textarea:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 0.25rem rgba(26, 115, 232, 0.2);
+}
+
+.form__field small {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  .form__field small {
+    color: rgba(255, 255, 255, 0.65);
+  }
+}
+
+.form__submit {
+  background: linear-gradient(135deg, #1a73e8, #4285f4);
+  font-weight: 600;
+}
+
+.app__status {
+  margin-top: 2rem;
+}
+
+.status {
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  background: rgba(26, 115, 232, 0.08);
+}
+
+.status--info {
+  border-color: rgba(26, 115, 232, 0.3);
+}
+
+.status--success {
+  background: rgba(15, 157, 88, 0.12);
+  border-color: rgba(15, 157, 88, 0.35);
+}
+
+.status--error {
+  background: rgba(234, 67, 53, 0.12);
+  border-color: rgba(234, 67, 53, 0.35);
+}
+
+.status--warning {
+  background: rgba(251, 188, 4, 0.18);
+  border-color: rgba(251, 188, 4, 0.45);
+  color: #5c4200;
+}
+
+.status a {
+  color: inherit;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  main.app {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .app__form {
+    padding: 1.25rem;
+  }
+}
